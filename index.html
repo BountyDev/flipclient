@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js"></script>
+  <script src="https://cdn.socket.io/4.7.1/socket.io.min.js"></script>
+  <script src="https://unpkg.com/@solana/web3.js@v1.33.0/lib/index.iife.js"></script>
+</head>
+
+<body>
+  <img src="assets/fliplogo.png" class="logo">
+  <img
+      id="connect_button"
+      src="assets/phantom.png"
+      alt="Connect Wallet"
+      onclick="connectWallet()"
+  >
+  <div class="column">
+    <p id="wallet_balance">Wallet Balance: 0 SOL</p> <!-- Display balance here -->
+  </div>
+
+  <div>
+    <img src="assets/tokenholder.png" class="token token1" data-token="1" alt="Token 1">
+    <img src="assets/tokenholder.png" class="token token2" data-token="2" alt="Token 2">
+  </div>
+
+  <img src="assets/vs.png" class="vs">
+
+  <img class="tokenImage" src="https://dd.dexscreener.com/ds-data/tokens/solana/5LafQUrVco6o7KMz42eqVEJ9LW31StPyGjeeu5sKoMtA.png?size=xl&key=0b7765" width="250px" height="250px" alt="Mumu Token"/>
+  <img class="tokenImage2" src="https://dd.dexscreener.com/ds-data/tokens/solana/A8C3xuqscfmyLrte3VmTqrAq8kgMASius9AFNANwpump.png?size=xl&key=0b7765" width="250px" height="250px" alt="Mumu Token"/>
+
+  <script>
+    var wallet;
+    var state;
+    state = "inbetween"
+    const lamports_per_sol = solanaWeb3.LAMPORTS_PER_SOL;
+
+    const DEXSCREENER_API_URL = "https://api.dexscreener.com/latest/dex/tokens/";
+    const TOKEN_ADDRESS = "5LafQUrVco6o7KMz42eqVEJ9LW31StPyGjeeu5sKoMtA";
+
+    const socket = io('http://127.0.0.1:5000');  // Connect to the server running on localhost:5000
+
+    // Log connection success
+    socket.on('connect', () => {
+      console.log('Connected to server');
+      // Test emitting an event from the client to the server and back
+    });
+
+    // Log disconnection
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+
+    // Listening for 'token_update' event from the server
+    socket.on('token_update', (data) => {
+      console.log('Token update received:', data);
+      // Update the first token image
+    const tokenImage = document.querySelector('.tokenImage');
+    if (tokenImage) {
+      tokenImage.src = `https://dd.dexscreener.com/ds-data/tokens/solana/${data.token1.ca}.png?size=xl&key=0b7765`;
+      tokenImage.alt = data.token1.name;
+      tokenImage.style.visibility = 'visible'; // Make the image visible
+    }
+
+    // Update the second token image
+    const tokenImage2 = document.querySelector('.tokenImage2');
+    if (tokenImage2) {
+      tokenImage2.src = `https://dd.dexscreener.com/ds-data/tokens/solana/${data.token2.ca}.png?size=xl&key=0b7765`;
+      tokenImage2.alt = data.token2.name;
+      tokenImage2.style.visibility = 'visible'; // Make the image visible
+    }
+    });
+
+    async function fetchPrice() {
+        try {
+            const response = await fetch(`${DEXSCREENER_API_URL}${TOKEN_ADDRESS}`);
+            const data = await response.json();
+
+            if (data && data.pairs && data.pairs.length > 0) {
+                // Get the first pair and extract the price
+                const pair = data.pairs[0]; // First trading pair
+                const price = pair.priceUsd; // Price in USD
+                document.getElementById("price").innerText = `$${parseFloat(price).toFixed(10)}`;
+            } else {
+                document.getElementById("price").innerText = "Price unavailable";
+            }
+        } catch (error) {
+            console.error("Error fetching price:", error);
+            document.getElementById("price").innerText = "Error fetching price";
+        }
+    }
+
+
+    async function connectWallet() {
+      // Check if Phantom wallet is installed and available
+      if (window.solana && window.solana.isPhantom) {
+        console.log("Phantom wallet detected.");
+
+        try {
+          // Attempt to connect to the wallet
+          wallet = await window.solana.connect();
+
+          // Log and update the UI with the connected wallet address
+          console.log("Connected to wallet:", wallet.publicKey.toString());
+          document.getElementById("connect_button").innerText = "Connected";
+
+          // Fetch and display wallet balance
+          await displayWalletBalance(wallet.publicKey);
+
+          // Add an event listener for any future connection events
+          window.solana.on("connect", async () => {
+            console.log("Wallet reconnected:", wallet.publicKey.toString());
+            document.getElementById("connect_button").innerText = "Connected";
+            await displayWalletBalance(wallet.publicKey); // Update balance on reconnect
+          });
+        } catch (err) {
+          console.error("Failed to connect wallet:", err.message);
+          alert("Connection to Phantom wallet failed. Please try again.");
+        }
+      } else {
+        // Inform the user that Phantom is not installed
+        alert("Phantom wallet not found. Please install it from https://phantom.app/");
+      }
+    }
+
+    // Function to display wallet balance
+    async function displayWalletBalance(publicKey) {
+      const network = "https://cosmological-stylish-patina.solana-mainnet.quiknode.pro/fb6e9fb31154cf8c989b3d69643b4eb5ff17956e"; // Mainnet
+      const connection = new solanaWeb3.Connection(network, "confirmed");
+
+      try {
+        const balanceInLamports = await connection.getBalance(publicKey);
+        const balanceInSOL = balanceInLamports / lamports_per_sol;
+        document.getElementById("wallet_balance").innerText = `Wallet Balance: ${balanceInSOL.toFixed(3)} SOL`;
+        console.log(`Wallet Balance: ${balanceInSOL.toFixed(3)} SOL`);
+      } catch (err) {
+        console.error("Failed to fetch balance:", err);
+        alert("Failed to fetch wallet balance. Please try again.");
+      }
+    }
+
+    async function sendButtonClick() {
+      const receiverAddress = document.getElementById("address").value;
+      const quantity = document.getElementById("quantity").value;
+
+      if (quantity != null && quantity != 0) {
+        document.getElementById("status_p").innerText = `Sending ${quantity} SOL to ${ellipsizeAddress(receiverAddress)}`;
+        await signInTransactionAndSendMoney(receiverAddress, quantity);
+      } else {
+        document.getElementById("status_p").innerText = "Amount must be more than 0!";
+      }
+    }
+
+    function ellipsizeAddress(str) {
+      if (str.length > 35) {
+        return str.substr(0, 8) + '...' + str.substr(str.length - 8, str.length);
+      }
+      return str;
+    }
+
+    async function signInTransactionAndSendMoney(destPubkeyStr, quantity) {
+      const network = "https://cosmological-stylish-patina.solana-mainnet.quiknode.pro/fb6e9fb31154cf8c989b3d69643b4eb5ff17956e";
+      const connection = new solanaWeb3.Connection(network, "confirmed");
+
+      try {
+        const lamports = quantity * lamports_per_sol;
+        const destPubkey = new solanaWeb3.PublicKey(destPubkeyStr);
+
+        // Create the transaction
+        const transaction = new solanaWeb3.Transaction();
+        const instruction = solanaWeb3.SystemProgram.transfer({
+          fromPubkey: wallet.publicKey,
+          toPubkey: destPubkey,
+          lamports,
+        });
+
+        transaction.add(instruction);
+        transaction.feePayer = wallet.publicKey;
+
+        // Fetch the latest blockhash
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+
+        // Sign the transaction using the connected wallet
+        const signedTransaction = await window.solana.signTransaction(transaction);
+
+        // Serialize the transaction and send it to the server
+        const serializedTransaction = signedTransaction.serialize().toString("base64");
+
+        const response = await fetch("http://127.0.0.1:5000/send", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ transaction: serializedTransaction }),
+});
+
+console.log("Fetch Response:", response);
+
+const result = await response.json();
+if (response.ok) {
+  alert(`Transaction successful! Signature: ${result.signature}`);
+} else {
+  console.log("Transaction failed:", result.error);
+  alert(`Transaction failed: ${result.error}`);
+}
+} catch (error) {
+console.log("Fetch error:", error);
+alert("Failed to send transaction. Please try again.");
+}
+    }
+  </script>
+
+</body>
+
+</html>

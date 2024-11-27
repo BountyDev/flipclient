@@ -1,0 +1,148 @@
+
+html {
+    margin: auto;
+}
+
+body {
+  overflow: hidden;
+  margin: 0; /* Remove default margin */
+  height: 100vh; /* Full viewport height */
+  background: linear-gradient(110deg, #821294 50%, #268171 50%);
+}
+.vs {
+  position: absolute; /* Allows precise positioning */
+  top: 50%; /* Move to the vertical center */
+  left: 50%; /* Move to the horizontal center */
+  transform: translate(-50%, -50%); /* Adjust for image's dimensions */
+  z-index: -1; /* Proper syntax for z-index */
+  width: auto; /* Maintain aspect ratio */
+  height: auto; /* Maintain aspect ratio */
+  max-width: 50%; /* Optional: Adjust size */
+}
+#connect_button {
+    position: absolute; /* Allows precise positioning */e */
+    height: auto; /* Maintain aspect ratio */
+    right: 15px;
+    cursor: pointer;\
+}
+
+.tokenImage {
+  position: absolute; /* Allows precise positioning */
+  top: 50%; /* Move to the vertical center */
+  left: 25%; /* Move to the horizontal center */
+  width: 400px;
+  height: 400px;
+  border-radius: 50%; /* Makes the image circular */
+  object-fit: cover; /* Ensures the image fits well within the circle */
+  border: 2px solid #ccc; /* Optional: Adds a border around the image */
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.tokenImage2 {
+  position: absolute; /* Allows precise positioning */
+  top: 50%; /* Move to the vertical center */
+  left: 75%; /* Move to the horizontal center */
+  width: 400px;
+  height: 400px;
+  border-radius: 50%; /* Makes the image circular */
+  object-fit: cover; /* Ensures the image fits well within the circle */
+  border: 2px solid #ccc; /* Optional: Adds a border around the image */
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.logo {
+  position: absolute;
+  width: 200px;
+  height: auto;
+  top: -5%; /* Move it up by positioning it closer to the top of the container */
+}
+
+/* General styles for the tokens */
+.token {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out; /* Smooth scaling effect on hover */
+}
+
+/* Positioning for token1 */
+.token1 {
+  top: 50%; /* Center vertically */
+  left: 25%; /* Position towards the left */
+  transform: translate(-50%, -50%); /* Adjust for centering */
+}
+
+/* Positioning for token2 */
+.token2 {
+  top: 50%; /* Center vertically */
+  left: 75%; /* Position towards the right */
+  transform: translate(-50%, -50%); /* Adjust for centering */
+}
+
+/* Hover effect changes the image */
+.token:hover {
+/*  content: url('assets/tokenholderactive.png'); /* Change the image */
+  transform: scale(1.1); /* Slight enlargement while keeping the position */
+  transform: translate(-50%, -50%);
+}
+
+/* Selected token styling */
+.token.selected {
+  border: 3px solid #4caf50; /* Highlight selected token */
+  border-radius: 50%; /* Rounded border for selected tokens */
+}
+
+.button-9 {
+  appearance: button;
+  backface-visibility: hidden;
+  background-color: #405cf5;
+  border-radius: 6px;
+  border-width: 0;
+  box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset,rgba(50, 50, 93, .1) 0 2px 5px 0,rgba(0, 0, 0, .07) 0 1px 1px 0;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  font-family: -apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif;
+  font-size: 100%;
+  height: 40px;
+  line-height: 1.15;
+  margin: 12px 0 0;
+  outline: none;
+  overflow: hidden;
+  padding: 0 25px;
+  position: relative;
+  text-align: center;
+  text-transform: none;
+  transform: translateZ(0);
+  transition: all .2s,box-shadow .08s ease-in;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 25%;
+}
+
+.button-9:disabled {
+  cursor: default;
+}
+
+.button-9:focus {
+  box-shadow: rgba(50, 50, 93, .1) 0 0 0 1px inset, rgba(50, 50, 93, .2) 0 6px 15px 0, rgba(0, 0, 0, .1) 0 2px 2px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 112px;
+    flex-wrap: wrap;
+}
+
+.Input {
+    padding-inline-start: 8px;
+    height: 34px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
